@@ -7,10 +7,10 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "dummy"
+BOT_NAME = "scrape_jitterbit"
 
-SPIDER_MODULES = ["dummy.spiders"]
-NEWSPIDER_MODULE = "dummy.spiders"
+SPIDER_MODULES = ["scrape_jitterbit.spiders"]
+NEWSPIDER_MODULE = "scrape_jitterbit.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent

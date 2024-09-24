@@ -1,13 +1,20 @@
 from scrapy import Spider
+import os
 
-url_list = []
 
-with open("alldocslinks.txt","r") as filestream:
-    for line in filestream:
-        url_list.extend(line.split(","))
 
 class MultiUrlSpider(Spider):
     name = "multi_url_spider"
+    
+    url_list = []
+    
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    
+    file_path = os.path.join(current_dir,"links.txt")
+    
+    with open(file_path,"r") as filestream:
+        for line in filestream:
+            url_list.extend(line.split(","))
 
     # List of URLs you want to scrape
     start_urls = url_list

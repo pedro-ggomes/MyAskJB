@@ -4,7 +4,6 @@ __pycache__/
 db.sqlite3
 migrations/
 media/
-settings.py
 # C extensions
 *.so
 
@@ -60,3 +59,6 @@ target/
 
 # Chroma Vector DB sqlite
 chroma_db
+
+scrape_jitterbit/output.json
+
