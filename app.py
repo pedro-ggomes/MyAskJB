@@ -1,5 +1,5 @@
 import streamlit as st
-from chat_llm import chat_response
+from get_embedding_function import chatbot_response
 
 st.title("Echo Bot")
 
@@ -19,7 +19,7 @@ if prompt := st.chat_input("What is up?"):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    response = chat_response(prompt)
+    response = chatbot_response(prompt)
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
         st.markdown(response)

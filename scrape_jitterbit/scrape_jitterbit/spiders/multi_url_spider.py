@@ -21,7 +21,7 @@ class MultiUrlSpider(Spider):
 
     def parse(self, response):
         # Extract the text content from the page
-        page_text = response.xpath("//body//text()").getall()
+        page_text = response.xpath("/html/body/div[7]/main/div/div[3]/article//text()[not(ancestor::script)]").getall()
         cleaned_text = ''.join(page_text).strip()
 
         # Save or process the extracted data

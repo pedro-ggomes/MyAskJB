@@ -60,5 +60,7 @@ target/
 # Chroma Vector DB sqlite
 chroma_db
 
+my_chroma_db
+
 scrape_jitterbit/output.json
 

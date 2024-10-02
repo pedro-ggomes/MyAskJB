@@ -12,6 +12,7 @@ BOT_NAME = "scrape_jitterbit"
 SPIDER_MODULES = ["scrape_jitterbit.spiders"]
 NEWSPIDER_MODULE = "scrape_jitterbit.spiders"
 
+FEED_EXPORT_BATCH_ITEM_COUNT = 100
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "dummy (+http://www.yourdomain.com)"
