@@ -1,27 +1,29 @@
 import streamlit as st
-from get_embedding_function import chatbot_response
+from query_data import query_rag
 
-st.title("Echo Bot")
+def main():
+    st.title("ChatGPT Clone")
+    st.write("This is a simple ChatGPT clone using Streamlit and OpenAI's GPT-3.")
 
-# Initialize chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+    # Initialize session state for storing chat history
+    if 'chat_history' not in st.session_state:
+        st.session_state['chat_history'] = []
 
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    # User input
+    user_input = st.text_input("You:", "")
 
-# React to user input
-if prompt := st.chat_input("What is up?"):
-    # Display user message in chat message container
-    st.chat_message("user").markdown(prompt)
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    if st.button("Send"):
+        if user_input:
+            # Append user input to chat history
+            st.session_state['chat_history'].append(f"You: {user_input}")
 
-    response = chatbot_response(prompt)
-    # Display assistant response in chat message container
-    with st.chat_message("assistant"):
-        st.markdown(response)
-    # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+            # Generate response from GPT-3
+            response = query_rag(user_input)
+            st.session_state['chat_history'].append(f"Bot: {response}")
+
+    # Display chat history
+    for message in st.session_state['chat_history']:
+        st.write(message)
+
+if __name__ == "__main__":
+    main()
