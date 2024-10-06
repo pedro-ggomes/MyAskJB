@@ -17,6 +17,6 @@ var link = document.createElement("a");
 
 link.href = URL.createObjectURL(blob);
 
-link.download = "alldocslinks.txt";
+link.download = "links.txt";
 
 link.click();

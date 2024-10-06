@@ -1,4 +1,3 @@
-import argparse
 import os
 import shutil
 from langchain.document_loaders import DirectoryLoader
@@ -12,29 +11,16 @@ from langchain.vectorstores.chroma import Chroma
 CHROMA_PATH = os.environ.get("CHROMADB_PATH")
 DATA_PATH = os.environ.get("DATA_PATH")
 
-
-print(DATA_PATH)
-print(CHROMA_PATH)
-
 def main():
-
-	# Check if the database should be cleared (using the --clear flag).
-	parser = argparse.ArgumentParser()
-	parser.add_argument("--reset", action="store_true", help="Reset the database.")
-	args = parser.parse_args()
-	if args.reset:
-		print("✨ Clearing Database")
-		clear_database()
-
 	# Create (or update) the data store.
-	documents = load_documents()
+	documents = load_documents(DATA_PATH)
 	chunks = split_documents(documents)
 	add_to_chroma(chunks)
 	print("✨ Documents added to Database")
 
 
-def load_documents():
-	document_loader = DirectoryLoader(DATA_PATH,
+def load_documents(path:str):
+	document_loader = DirectoryLoader(path,
                                       glob="**/*.json",
                                       show_progress=True,
                                       loader_cls=JSONLoader,
@@ -57,12 +43,13 @@ def add_to_chroma(chunks: list[Document]):
 	db = Chroma(
 		persist_directory=CHROMA_PATH, embedding_function=get_embedding_function()
 	)
+	print(chunks[0].metadata.get("source"), chunks[0].metadata.get("seq_num"))
 
 	# Calculate Page IDs.
 	chunks_with_ids = calculate_chunk_ids(chunks)
 
 	# Add or Update the documents.
-	existing_items = db.get(include=[]) # IDs are always included by default
+	existing_items = db.get(include=[])  # IDs are always included by default
 	existing_ids = set(existing_items["ids"])
 	print(f"Number of existing documents in DB: {len(existing_ids)}")
 
@@ -72,37 +59,42 @@ def add_to_chroma(chunks: list[Document]):
 		if chunk.metadata["id"] not in existing_ids:
 			new_chunks.append(chunk)
 
-	if len(new_chunks):
+	# Batch the insertion of new documents
+	if len(new_chunks) > 0:
 		print(f"👉 Adding new documents: {len(new_chunks)}")
-		new_chunk_ids = [chunk.metadata["id"] for chunk in new_chunks]
-		db.add_documents(new_chunks, ids=new_chunk_ids)
-		db.persist()
+		batch_size = 1000
+		for i in range(0, len(new_chunks), batch_size):
+			batch = new_chunks[i:i + batch_size]
+			new_chunk_ids = [chunk.metadata["id"] for chunk in batch]
+			db.add_documents(batch, ids=new_chunk_ids)
+			print(f"Batch {i//batch_size + 1}: Added {len(batch)} documents")
+			
 	else:
 		print("✅ No new documents to add")
 
 
 def calculate_chunk_ids(chunks):
 
-	# This will create IDs like "data/monopoly.pdf:6:2"
-	# Page Source : Page Number : Chunk Index
+	# This will create IDs like "scrape_jitterbit_result/1-output2024-09-27T20-05-22.992580+00-00.json:6:2"
+	# Document Source : Sequential Number : Chunk Index
 
-	last_page_id = None
+	last_document_id = None
 	current_chunk_index = 0
 
 	for chunk in chunks:
 		source = chunk.metadata.get("source")
-		page = chunk.metadata.get("page")
-		current_page_id = f"{source}:{page}"
+		seq_num = chunk.metadata.get("seq_num")
+		current_document_id = f"{source}:{seq_num}"
 
 		# If the page ID is the same as the last one, increment the index.
-		if current_page_id == last_page_id:
+		if current_document_id == last_document_id:
 			current_chunk_index += 1
 		else:
 			current_chunk_index = 0
 
 		# Calculate the chunk ID.
-		chunk_id = f"{current_page_id}:{current_chunk_index}"
-		last_page_id = current_page_id
+		chunk_id = f"{current_document_id}:{current_chunk_index}"
+		last_document_id = current_document_id
 
 		# Add it to the page meta-data.
 		chunk.metadata["id"] = chunk_id
