@@ -1,30 +1,37 @@
 import os
 import shutil
-from langchain.document_loaders import DirectoryLoader
-from langchain.document_loaders.json_loader import JSONLoader
+import argparse
+from langchain_community.document_loaders import DirectoryLoader
+from langchain_community.document_loaders import JSONLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.schema.document import Document
+from langchain_core.documents import Document
 from get_embedding_function import get_embedding_function
-from langchain.vectorstores.chroma import Chroma
+from langchain_chroma import Chroma
 
 
 CHROMA_PATH = os.environ.get("CHROMADB_PATH")
 DATA_PATH = os.environ.get("DATA_PATH")
 
 def main():
-	# Create (or update) the data store.
+	parser = argparse.ArgumentParser(prog="Populate vector database with especific embeddings")
+	parser.add_argument("--reset", action="store_true", help="Reset the database.")
+	args = parser.parse_args()
+			# Create (or update) the data store.
+	if args.reset:
+		print('Reseting database')
+		clear_database()
 	documents = load_documents(DATA_PATH)
 	chunks = split_documents(documents)
 	add_to_chroma(chunks)
-	print("✨ Documents added to Database")
+	print("Documents added to Database")
 
 
 def load_documents(path:str):
 	document_loader = DirectoryLoader(path,
-                                      glob="**/*.json",
-                                      show_progress=True,
-                                      loader_cls=JSONLoader,
-                                      loader_kwargs={'jq_schema':".[] | {url: .url, text: .text}","text_content":False})
+		glob="**/*.json",
+		show_progress=True,
+		loader_cls=JSONLoader,
+		loader_kwargs={'jq_schema':".[] | {url: .url, text: .text}","text_content":False})
 	return document_loader.load()
 
 
@@ -49,7 +56,7 @@ def add_to_chroma(chunks: list[Document]):
 	chunks_with_ids = calculate_chunk_ids(chunks)
 
 	# Add or Update the documents.
-	existing_items = db.get(include=[])  # IDs are always included by default
+	existing_items = db.get(include=[]) # IDs are always included by default
 	existing_ids = set(existing_items["ids"])
 	print(f"Number of existing documents in DB: {len(existing_ids)}")
 
@@ -62,20 +69,20 @@ def add_to_chroma(chunks: list[Document]):
 	# Batch the insertion of new documents
 	if len(new_chunks) > 0:
 		print(f"👉 Adding new documents: {len(new_chunks)}")
-		batch_size = 1000
+		batch_size = 500
 		for i in range(0, len(new_chunks), batch_size):
 			batch = new_chunks[i:i + batch_size]
 			new_chunk_ids = [chunk.metadata["id"] for chunk in batch]
 			db.add_documents(batch, ids=new_chunk_ids)
 			print(f"Batch {i//batch_size + 1}: Added {len(batch)} documents")
-			
+
 	else:
 		print("✅ No new documents to add")
 
 
 def calculate_chunk_ids(chunks):
 
-	# This will create IDs like "scrape_jitterbit_result/1-output2024-09-27T20-05-22.992580+00-00.json:6:2"
+	# This will create IDs like "1-output2024-09-27T20-05-22.992580+00-00.json:6:2"
 	# Document Source : Sequential Number : Chunk Index
 
 	last_document_id = None
