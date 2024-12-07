@@ -75,5 +75,5 @@ streamlit run app.py
 ```
 ## Screenshots
 
-![App Screenshot](https://iili.io/2Geyy1j.md.png)
+![App Screenshot](https://i.ibb.co/zPd7q5Q/jitterbit-doc-bot-demo.png)
 
