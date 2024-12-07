@@ -16,12 +16,13 @@ def main():
 	parser = argparse.ArgumentParser(prog="Populate vector database with especific embeddings")
 	parser.add_argument("--reset", action="store_true", help="Reset the database.")
 	args = parser.parse_args()
-			# Create (or update) the data store.
+	# Clear (delete) database
 	if args.reset:
 		print('Reseting database')
 		clear_database()
 	documents = load_documents(DATA_PATH)
 	chunks = split_documents(documents)
+	# Create (or update) the data store.
 	add_to_chroma(chunks)
 	print("Documents added to Database")
 
