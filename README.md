@@ -33,13 +33,13 @@ Cd into project folder:
 Create Python virtual environment:
 
 ```bash
-python -m venv env
+  python -m venv env
 ```
 Activate virtual environment:
 
 Windows PowerShell:
 ```bash
-.\env\Scripts\Activate.ps1 
+  .\env\Scripts\Activate.ps1 
 ```
 Install the dependencies:
 
@@ -66,19 +66,19 @@ If you want to break up the output into chunks add FEED_EXPORT_BATCH_ITEM_COUNT 
 ```
 After scraping your documentation of choice download and install ollama llm and run:
 ```bash
-ollama pull mistral
+  ollama pull mistral
 ```
 Then:
 ```bash
-ollama serve
+  ollama serve
 ```
 When that is finished run (this will take a long time depending on your computer's configurations):
 ```bash
-python populate_database.py
+  python populate_database.py
 ```
 Now for the last step run:
 ```bash
-streamlit run app.py
+  streamlit run app.py
 ```
 ## Screenshots
 
