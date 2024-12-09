@@ -2,6 +2,13 @@
 
 My take on the AskJB AI chatbot using Python, Scrapy, LangChain, ChromaDB and StreamLit UI
 
+## Environment variables
+
+To run this project, you will need to add the following variables to your .env file
+
+`CHROMA_PATH`: The path to your chroma db folder.
+
+`DATA_PATH`: The path to your folder containing the resulting data from the webscraping. 
 
 ## Requirements
 
